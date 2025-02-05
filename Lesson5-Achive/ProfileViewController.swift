@@ -29,6 +29,9 @@ private enum UIConstants {
     
     static let cardDefaultBottomConstant: CGFloat = 50
     static let collectionHiddenAlpha: CGFloat = 0
+    
+    static let leadingInset: CGFloat = 16
+    static let cardViewHeight: CGFloat = 200
 }
 
 class ProfileViewController: UIViewController {
@@ -41,6 +44,7 @@ class ProfileViewController: UIViewController {
         view.layer.shadowOpacity = UIConstants.cardShadowOpacity
         view.layer.shadowRadius = UIConstants.cardShadowRadius
         view.layer.shadowOffset = UIConstants.cardShadowOffset
+        view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
     
@@ -49,6 +53,7 @@ class ProfileViewController: UIViewController {
         label.text = UserInfo.name
         label.font = .systemFont(ofSize: 24, weight: .bold)
         label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
@@ -59,6 +64,7 @@ class ProfileViewController: UIViewController {
         label.textAlignment = .center
         label.numberOfLines = 1
         label.alpha = UIConstants.collectionHiddenAlpha
+        label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
@@ -70,9 +76,41 @@ class ProfileViewController: UIViewController {
         return imageView
     }()
     
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .purple
+        view.backgroundColor = .green
+        setupUI()
+    }
+    
+    private func setupUI() {
+        let stackView = UIStackView(arrangedSubviews: [avatarImageView, nameLabel, bioLabel])
+        stackView.axis = .vertical
+        stackView.spacing = UIConstants.profileStackPadding
+        stackView.alignment = .center
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        cardView.addSubview(stackView)
+        view.addSubview(cardView)
+        
+        let nameLabel = nameLabel.intrinsicContentSize.height
+        let stackViewBottomPadding: CGFloat = 16
+        let initialCapsPosition = -(CGFloat(nameLabel) + stackViewBottomPadding + view.safeAreaInsets.bottom)
+        
+        NSLayoutConstraint.activate([
+            cardView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: initialCapsPosition),
+            cardView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: UIConstants.leadingInset),
+            cardView.trailingAnchor.constraint(equalTo: view.trailingAnchor , constant: -UIConstants.leadingInset),
+            cardView.heightAnchor.constraint(equalToConstant: UIConstants.cardViewHeight),
+            
+            stackView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: UIConstants.profileStackPadding),
+            stackView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -UIConstants.profileStackPadding),
+            stackView.centerYAnchor.constraint(equalTo: cardView.centerYAnchor),
+            
+            avatarImageView.widthAnchor.constraint(equalToConstant: UIConstants.avatarImageSize),
+            avatarImageView.heightAnchor.constraint(equalToConstant: UIConstants.avatarImageSize)
+        ])
     }
 }
 
