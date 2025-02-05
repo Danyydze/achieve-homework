@@ -37,7 +37,10 @@ private enum UIConstants {
 class ProfileViewController: UIViewController {
     
     private var cardBottomConstraint: NSLayoutConstraint!
+    private var collectionViewTopConstraint: NSLayoutConstraint!
     private var isCardCollapsed: Bool = true
+    
+    private let achievments = Achievment.demoData
 
     private let cardView: UIView = {
         let view = UIView()
@@ -47,6 +50,20 @@ class ProfileViewController: UIViewController {
         view.layer.shadowOpacity = UIConstants.cardShadowOpacity
         view.layer.shadowRadius = UIConstants.cardShadowRadius
         view.layer.shadowOffset = UIConstants.cardShadowOffset
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private let collectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.itemSize = UIConstants.collectionItemSize
+        layout.minimumInteritemSpacing = UIConstants.collectionMinimumInteritemSpacing
+        layout.minimumLineSpacing = UIConstants.collectionMinimumLineSpacing
+        layout.sectionInset = UIConstants.collectionSectionInset
+        
+        let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        view.backgroundColor = .clear
+        view.showsHorizontalScrollIndicator = false
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -85,6 +102,7 @@ class ProfileViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .systemGray5
         setupUI()
+        setupCollectionView()
     }
     
     private func setupUI() {
@@ -96,6 +114,7 @@ class ProfileViewController: UIViewController {
         
         cardView.addSubview(stackView)
         view.addSubview(cardView)
+        view.addSubview(collectionView)
         
         cardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleCardTap)))
         
@@ -103,6 +122,7 @@ class ProfileViewController: UIViewController {
         let stackViewBottomPadding: CGFloat = 16
         let initialCapsPosition = -(CGFloat(nameLabel) + stackViewBottomPadding + view.safeAreaInsets.bottom)
         cardBottomConstraint = cardView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: initialCapsPosition)
+        collectionViewTopConstraint = collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: UIConstants.cardViewHeight)
 
         
         NSLayoutConstraint.activate([
@@ -116,8 +136,22 @@ class ProfileViewController: UIViewController {
             stackView.centerYAnchor.constraint(equalTo: cardView.centerYAnchor),
             
             avatarImageView.widthAnchor.constraint(equalToConstant: UIConstants.avatarImageSize),
-            avatarImageView.heightAnchor.constraint(equalToConstant: UIConstants.avatarImageSize)
+            avatarImageView.heightAnchor.constraint(equalToConstant: UIConstants.avatarImageSize),
+            
+            collectionViewTopConstraint,
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+        
+        cardView.layer.zPosition = 1
+    }
+    
+    private func setupCollectionView(){
+        collectionView.register(AchievmentCell.self, forCellWithReuseIdentifier: "AchivmentCell")
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.alpha = UIConstants.collectionHiddenAlpha
     }
     
     @objc func handleCardTap() {
@@ -132,10 +166,31 @@ class ProfileViewController: UIViewController {
             }else{
                 self.cardBottomConstraint.constant = -(self.view.frame.height - self.view.safeAreaInsets.top - UIConstants.cardViewHeight)
             }
+            self.collectionView.transform = self.isCardCollapsed
+            ? CGAffineTransform(translationX: 0, y: self.view.frame.height / 2)
+            : .identity
+            self.collectionView.alpha = self.isCardCollapsed ? 0 : 1
+            
             self.bioLabel.alpha = self.isCardCollapsed ? 0 : 1
             
             self.view.layoutIfNeeded()
-        })
+        }) { _ in
+            self.collectionView.isUserInteractionEnabled = !self.isCardCollapsed
+        }
     }
+}
+
+extension ProfileViewController: UICollectionViewDelegate, UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return achievments.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "AchivmentCell", for: indexPath) as! AchievmentCell
+        cell.configure(with: achievments[indexPath.item])
+        return cell
+    }
+    
+    
 }
 
