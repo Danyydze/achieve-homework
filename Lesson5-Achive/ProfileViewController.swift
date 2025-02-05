@@ -35,6 +35,9 @@ private enum UIConstants {
 }
 
 class ProfileViewController: UIViewController {
+    
+    private var cardBottomConstraint: NSLayoutConstraint!
+    private var isCardCollapsed: Bool = true
 
     private let cardView: UIView = {
         let view = UIView()
@@ -80,7 +83,7 @@ class ProfileViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .green
+        view.backgroundColor = .systemGray5
         setupUI()
     }
     
@@ -94,12 +97,16 @@ class ProfileViewController: UIViewController {
         cardView.addSubview(stackView)
         view.addSubview(cardView)
         
+        cardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleCardTap)))
+        
         let nameLabel = nameLabel.intrinsicContentSize.height
         let stackViewBottomPadding: CGFloat = 16
         let initialCapsPosition = -(CGFloat(nameLabel) + stackViewBottomPadding + view.safeAreaInsets.bottom)
+        cardBottomConstraint = cardView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: initialCapsPosition)
+
         
         NSLayoutConstraint.activate([
-            cardView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: initialCapsPosition),
+            cardBottomConstraint,
             cardView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: UIConstants.leadingInset),
             cardView.trailingAnchor.constraint(equalTo: view.trailingAnchor , constant: -UIConstants.leadingInset),
             cardView.heightAnchor.constraint(equalToConstant: UIConstants.cardViewHeight),
@@ -111,6 +118,24 @@ class ProfileViewController: UIViewController {
             avatarImageView.widthAnchor.constraint(equalToConstant: UIConstants.avatarImageSize),
             avatarImageView.heightAnchor.constraint(equalToConstant: UIConstants.avatarImageSize)
         ])
+    }
+    
+    @objc func handleCardTap() {
+        isCardCollapsed.toggle()
+        
+        UIView.animate(withDuration: 0.6, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.5, options: .curveEaseInOut, animations: {
+            if self.isCardCollapsed {
+                let nameLabel = self.nameLabel.intrinsicContentSize.height
+                let stackViewBottomPadding: CGFloat = 16
+                let targetPosition = -(CGFloat(nameLabel) + stackViewBottomPadding + self.view.safeAreaInsets.bottom)
+                self.cardBottomConstraint.constant = targetPosition
+            }else{
+                self.cardBottomConstraint.constant = -(self.view.frame.height - self.view.safeAreaInsets.top - UIConstants.cardViewHeight)
+            }
+            self.bioLabel.alpha = self.isCardCollapsed ? 0 : 1
+            
+            self.view.layoutIfNeeded()
+        })
     }
 }
 
