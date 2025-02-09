@@ -70,10 +70,21 @@ class AchievmentCell: UICollectionViewCell{
     }
     
     func configure(with achivment: Achievment) {
-        titleLabel.text = achivment.title
-        imageView.image = UIImage(systemName: achivment.iconName)?.withRenderingMode(.alwaysTemplate)
-        imageView.tintColor = achivment.color
-    }
-    
+            titleLabel.text = achivment.title
+            imageView.image = UIImage(systemName: achivment.iconName)?
+                .withRenderingMode(.alwaysTemplate)
+                
+            imageView.tintColor = achivment.currentProgress >= achivment.maxProgress
+                ? achivment.color
+                : .systemGray4
+        }
+        
+        @objc private func handlePinchGesture(_ gesture: UIPinchGestureRecognizer) {
+            guard gesture.scale > 1.5 else { return }
+            (superview as? UICollectionView)?.delegate?.collectionView?(
+                superview as! UICollectionView,
+                didSelectItemAt: IndexPath(item: tag, section: 0)
+            )
+        }
     
 }
