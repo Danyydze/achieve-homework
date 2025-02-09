@@ -90,7 +90,7 @@ class ProfileViewController: UIViewController {
     
     private let avatarImageView: UIImageView = {
         let imageView = UIImageView(image: UIImage(systemName: "person.crop.circle.fill"))
-        imageView.tintColor = .systemGreen
+        imageView.tintColor = .systemGray5
         imageView.contentMode = .scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
@@ -100,7 +100,7 @@ class ProfileViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemGray5
+        view.backgroundColor = .systemGray4
         setupUI()
         setupCollectionView()
     }
@@ -191,6 +191,15 @@ extension ProfileViewController: UICollectionViewDelegate, UICollectionViewDataS
         return cell
     }
     
-    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let achievement = achievments[indexPath.item]
+        let alert = UIAlertController(
+            title: achievement.title,
+            message: achievement.description,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
 }
 
