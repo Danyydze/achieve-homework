@@ -11,7 +11,7 @@ private enum UIConstants {
     static let shadowOpacity: Float = 0.1
     static let shadowRadius: CGFloat = 4
     static let shadowOffset: CGSize = CGSize(width: 0, height: 2)
-    static let imageHeight: CGFloat = 60
+    static let imageHeight: CGFloat = 65
     static let stackSpacing: CGFloat = 8
     static let stackPadding: CGFloat = 8
     static let titleLabelFont: UIFont = .systemFont(ofSize: 14, weight: .semibold)
@@ -64,15 +64,27 @@ class AchievmentCell: UICollectionViewCell{
             stackView.centerXAnchor.constraint(equalTo: centerXAnchor),
             stackView.centerYAnchor.constraint(equalTo: centerYAnchor),
             stackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: UIConstants.stackPadding),
-            imageView.heightAnchor.constraint(equalToConstant: UIConstants.imageHeight)
+            imageView.heightAnchor.constraint(equalToConstant: UIConstants.imageHeight),
+            imageView.widthAnchor.constraint(equalTo: imageView.heightAnchor)
         ])
     }
     
     func configure(with achivment: Achievment) {
-        titleLabel.text = achivment.title
-        imageView.image = UIImage(systemName: achivment.iconName)?.withRenderingMode(.alwaysTemplate)
-        imageView.tintColor = achivment.color
-    }
-    
+            titleLabel.text = achivment.title
+            imageView.image = UIImage(systemName: achivment.iconName)?
+                .withRenderingMode(.alwaysTemplate)
+                
+            imageView.tintColor = achivment.currentProgress >= achivment.maxProgress
+                ? achivment.color
+                : .systemGray4
+        }
+        
+        @objc private func handlePinchGesture(_ gesture: UIPinchGestureRecognizer) {
+            guard gesture.scale > 1.5 else { return }
+            (superview as? UICollectionView)?.delegate?.collectionView?(
+                superview as! UICollectionView,
+                didSelectItemAt: IndexPath(item: tag, section: 0)
+            )
+        }
     
 }
