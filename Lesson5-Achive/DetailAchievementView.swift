@@ -7,12 +7,21 @@
 
 import UIKit
 
+// MARK: - DetailAchievementViewDelegate
+
+protocol DetailAchievementViewDelegate: AnyObject {
+    func detailAchievementViewDidRequestClose(_ view: DetailAchievementView)
+}
+
 final class DetailAchievementView: UIView {
     
     // MARK: - Properties
+    
     private let achievement: Achievment
+    weak var delegate: DetailAchievementViewDelegate?
     
     // MARK: - UI Elements
+    
     private lazy var closeButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
@@ -26,8 +35,8 @@ final class DetailAchievementView: UIView {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
         imageView.tintColor = achievement.currentProgress >= achievement.maxProgress
-            ? achievement.color
-            : .systemGray4
+        ? achievement.color
+        : .systemGray4
         return imageView
     }()
     
@@ -66,6 +75,7 @@ final class DetailAchievementView: UIView {
     }()
     
     // MARK: - Init
+    
     init(achievement: Achievment) {
         self.achievement = achievement
         super.init(frame: .zero)
@@ -79,6 +89,7 @@ final class DetailAchievementView: UIView {
     }
     
     // MARK: - Setup
+    
     private func setupView() {
         backgroundColor = .systemBackground
         layer.cornerRadius = 20
@@ -86,10 +97,8 @@ final class DetailAchievementView: UIView {
         layer.shadowOpacity = 0.2
         layer.shadowRadius = 10
         layer.shadowOffset = CGSize(width: 0, height: 5)
-        
         iconImageView.image = UIImage(systemName: achievement.iconName)?
             .withConfiguration(UIImage.SymbolConfiguration(pointSize: 60))
-        
         let stackView = StackView(
             arrangedSubviews: [
                 iconImageView,
@@ -103,27 +112,28 @@ final class DetailAchievementView: UIView {
         )
         
         addSubview(stackView)
-        
         NSLayoutConstraint.activate([
-            stackView.topAnchor.constraint(equalTo: topAnchor, constant: 16),
-            stackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            stackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            stackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16)
+            stackView.topAnchor.constraint(equalTo: layoutMarginsGuide.topAnchor),
+            stackView.leadingAnchor.constraint(equalTo: layoutMarginsGuide.leadingAnchor),
+            stackView.trailingAnchor.constraint(equalTo: layoutMarginsGuide.trailingAnchor),
+            stackView.bottomAnchor.constraint(equalTo: layoutMarginsGuide.bottomAnchor),
+            iconImageView.widthAnchor.constraint(equalToConstant: 80),
+            iconImageView.heightAnchor.constraint(equalToConstant: 80)
         ])
     }
     
     private func addCloseButton() {
         addSubview(closeButton)
-        
         NSLayoutConstraint.activate([
             closeButton.topAnchor.constraint(equalTo: topAnchor, constant: 16),
             closeButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
             closeButton.widthAnchor.constraint(equalToConstant: 30),
-            closeButton.heightAnchor.constraint(equalToConstant: 30)
+            closeButton.heightAnchor.constraint(equalToConstant: 30),
         ])
     }
-    
+
     // MARK: - Gestures
+
     private func configureGestures() {
         let pinchGesture = UIPinchGestureRecognizer(
             target: self,
@@ -131,26 +141,26 @@ final class DetailAchievementView: UIView {
         )
         addGestureRecognizer(pinchGesture)
     }
-    
+
     // MARK: - Actions
+
     @objc private func closeButtonTapped() {
         animateClose()
     }
-    
+
     @objc private func handlePinchGesture(_ gesture: UIPinchGestureRecognizer) {
         guard gesture.state == .ended else { return }
-        
         if gesture.scale < 0.7 {
             animateClose()
         }
     }
-    
+
     private func animateClose() {
         UIView.animate(withDuration: 0.3, animations: {
             self.alpha = 0
             self.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
         }) { _ in
-            self.removeFromSuperview()
+            self.delegate?.detailAchievementViewDidRequestClose(self)
         }
     }
 }
