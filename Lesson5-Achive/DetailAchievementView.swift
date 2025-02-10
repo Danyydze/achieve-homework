@@ -87,33 +87,28 @@ final class DetailAchievementView: UIView {
         layer.shadowRadius = 10
         layer.shadowOffset = CGSize(width: 0, height: 5)
         
-        // Иконка
         iconImageView.image = UIImage(systemName: achievement.iconName)?
             .withConfiguration(UIImage.SymbolConfiguration(pointSize: 60))
         
-        // Контейнер
-        let stackView = UIStackView(arrangedSubviews: [
-            iconImageView,
-            titleLabel,
-            descriptionLabel,
-            progressView,
-            dateLabel
-        ])
-        stackView.axis = .vertical
-        stackView.spacing = 16
-        stackView.setCustomSpacing(24, after: iconImageView)
+        let stackView = StackView(
+            arrangedSubviews: [
+                iconImageView,
+                titleLabel,
+                descriptionLabel,
+                progressView,
+                dateLabel
+            ],
+            spacing: 16,
+            customSpacing: 24
+        )
         
         addSubview(stackView)
-        stackView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
             stackView.topAnchor.constraint(equalTo: topAnchor, constant: 16),
             stackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             stackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            stackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16),
-            
-            iconImageView.heightAnchor.constraint(equalToConstant: 80),
-            progressView.heightAnchor.constraint(equalToConstant: 4)
+            stackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16)
         ])
     }
     
