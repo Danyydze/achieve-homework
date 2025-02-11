@@ -40,6 +40,7 @@ class ProfileViewController: UIViewController {
     private var cardBottomConstraint: NSLayoutConstraint!
     private var isCardCollapsed: Bool = true
     private let achievements = Achievment.demoData
+    private var dataManager: DataManager!
     
     // MARK: - UI Elements
     private lazy var cardView: UIView = {
@@ -147,8 +148,12 @@ class ProfileViewController: UIViewController {
     
     private func setupCollectionView() {
         collectionView.register(AchievmentCell.self, forCellWithReuseIdentifier: "AchievmentCell")
-        collectionView.dataSource = self
-        collectionView.delegate = self
+        dataManager = DataManager(achievements: achievements)
+        dataManager.delegate = self
+        collectionView.dataSource = dataManager
+        collectionView.delegate = dataManager
+        
+        dataManager.setupPinchGesture(for: collectionView)
         collectionView.alpha = UIConstants.collectionHiddenAlpha
     }
     
@@ -167,31 +172,20 @@ class ProfileViewController: UIViewController {
     }
 }
 
-// MARK: - CollectionView DataSource & Delegate
-extension ProfileViewController: UICollectionViewDataSource, UICollectionViewDelegate {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        achievements.count
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "AchievmentCell", for: indexPath) as! AchievmentCell
-        cell.configure(with: achievements[indexPath.item])
-        return cell
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-            let achievement = achievements[indexPath.item]
-            let detailView = DetailAchievementView(achievement: achievement)
-            let horizontalInset: CGFloat = 50
-            let verticalInset: CGFloat = 270
-            detailView.frame = view.bounds.insetBy(dx: horizontalInset, dy: verticalInset)
-            detailView.alpha = 0
-            detailView.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
-            view.addSubview(detailView)
-            
-            UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.5) {
-                detailView.alpha = 1
-                detailView.transform = .identity
-            }
+// MARK: - DataManagerDelegate
+extension ProfileViewController: DataManagerDelegate {
+    func dataManager(_ manager: DataManager, didSelectAchievement achievement: Achievment) {
+        let detailView = DetailAchievementView(achievement: achievement)
+        let horizontalInset: CGFloat = 50
+        let verticalInset: CGFloat = 270
+        detailView.frame = view.bounds.insetBy(dx: horizontalInset, dy: verticalInset)
+        detailView.alpha = 0
+        detailView.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
+        view.addSubview(detailView)
+        
+        UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.5) {
+            detailView.alpha = 1
+            detailView.transform = .identity
+        }
     }
 }
