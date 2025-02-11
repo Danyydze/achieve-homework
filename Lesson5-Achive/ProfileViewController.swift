@@ -152,6 +152,8 @@ class ProfileViewController: UIViewController {
         dataManager.delegate = self
         collectionView.dataSource = dataManager
         collectionView.delegate = dataManager
+        
+        dataManager.setupPinchGesture(for: collectionView)
         collectionView.alpha = UIConstants.collectionHiddenAlpha
     }
     

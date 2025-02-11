@@ -131,9 +131,9 @@ final class DetailAchievementView: UIView {
             closeButton.heightAnchor.constraint(equalToConstant: 30),
         ])
     }
-
+    
     // MARK: - Gestures
-
+    
     private func configureGestures() {
         let pinchGesture = UIPinchGestureRecognizer(
             target: self,
@@ -141,25 +141,26 @@ final class DetailAchievementView: UIView {
         )
         addGestureRecognizer(pinchGesture)
     }
-
+    
     // MARK: - Actions
-
+    
     @objc private func closeButtonTapped() {
         animateClose()
     }
-
+    
     @objc private func handlePinchGesture(_ gesture: UIPinchGestureRecognizer) {
         guard gesture.state == .ended else { return }
         if gesture.scale < 0.7 {
             animateClose()
         }
     }
-
+    
     private func animateClose() {
-        UIView.animate(withDuration: 0.3, animations: {
-            self.alpha = 0
-            self.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
-        }) { _ in
+        UIView.animate(withDuration: 0.3, animations: { [weak self] in
+            self?.alpha = 0
+            self?.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+        }) { [weak self] _ in
+            guard let self = self else { return }
             self.delegate?.detailAchievementViewDidRequestClose(self)
         }
     }
